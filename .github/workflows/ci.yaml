@@ -1,0 +1,81 @@
+# -------------------------------------------------------------------
+# Name of the GitHub Actions workflow.
+# This name will appear in the "Actions" tab of your GitHub repository.
+# -------------------------------------------------------------------
+name: CI Workflow
+
+# -------------------------------------------------------------------
+# Events that trigger this workflow.
+# - push: Runs the workflow whenever code is pushed to the main branch.
+# - pull_request: Runs the workflow when a PR is opened, updated,
+#   or reopened against the main branch.
+# This ensures both direct commits and PRs are validated.
+# -------------------------------------------------------------------
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# -------------------------------------------------------------------
+# Jobs define the actual tasks executed by the workflow.
+# You can have multiple jobs; here we have a single job named "test".
+# -------------------------------------------------------------------
+jobs:
+  test:
+
+    # -----------------------------------------------------------------
+    # The type of virtual machine used to run this job.
+    # ubuntu-latest provides a clean Linux environment
+    # commonly used for Python CI pipelines.
+    # -----------------------------------------------------------------
+    runs-on: ubuntu-latest
+
+    # -----------------------------------------------------------------
+    # Steps are executed sequentially inside the job.
+    # Each step performs a specific action required for CI.
+    # -----------------------------------------------------------------
+    steps:
+
+    # ---------------------------------------------------------------
+    # Step 1: Checkout the repository code.
+    # This makes the contents of the GitHub repo available
+    # inside the runner so that tests and scripts can be executed.
+    # ---------------------------------------------------------------
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # ---------------------------------------------------------------
+    # Step 2: Set up the Python environment.
+    # This installs and configures Python 3.9 on the runner,
+    # ensuring consistent Python versions across all CI runs.
+    # ---------------------------------------------------------------
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    # ---------------------------------------------------------------
+    # Step 3: Install project dependencies.
+    # - pip is upgraded to avoid compatibility issues.
+    # - pytest is installed to run automated tests.
+    # - streamlit is installed because the project depends on it.
+    # NOTE: In production projects, this is often replaced by
+    #       `pip install -r requirements.txt`.
+    # ---------------------------------------------------------------
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest streamlit
+
+    # ---------------------------------------------------------------
+    # Step 4: Run the test suite.
+    # pytest executes the test file `_test.py`.
+    # If any test fails, the workflow will fail,
+    # preventing faulty code from being merged into main.
+    # ---------------------------------------------------------------
+    - name: Run tests
+      run: |
+        pytest _test.py
